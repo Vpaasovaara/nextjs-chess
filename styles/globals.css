@@ -1,16 +1,19 @@
-html,
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    @apply bg-gray-500;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.board {
+    @apply bg-red-100 grid grid-rows-[8] grid-cols-8 grid-flow-row;
 }
 
-* {
-  box-sizing: border-box;
+.blackTile {
+    @apply bg-gray-700 w-20 h-20 text-white p-1;
+}
+
+.whiteTile {
+    @apply bg-gray-300 w-20 h-20 text-black p-1;
 }
