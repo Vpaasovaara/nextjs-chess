@@ -15,7 +15,7 @@ export const defaultBoard: BoardType = [
             unit: {
                 class: 'knight',
                 team: 'white',
-                image: 'k_w'
+                image: 'n_w'
             }
         },
         {
@@ -60,7 +60,7 @@ export const defaultBoard: BoardType = [
             unit: {
                 class: 'knight',
                 team: 'white',
-                image: 'k_w'
+                image: 'n_w'
             }
         },
         {
@@ -320,72 +320,72 @@ export const defaultBoard: BoardType = [
             tile: 'A7',
             color: 'black',
             unit: {
-                class: 'rook',
+                class: 'pawn',
                 team: 'black',
-                image: 'r_b'
+                image: 'p_b'
             }
         },
         {
             tile: 'B7',
             color: 'white',
             unit: {
-                class: 'knight',
+                class: 'pawn',
                 team: 'black',
-                image: 'k_b'
+                image: 'p_b'
             }
         },
         {
             tile: 'C7',
             color: 'black',
             unit: {
-                class: 'bishop',
+                class: 'pawn',
                 team: 'black',
-                image: 'b_b'
+                image: 'p_b'
             }
         },
         {
             tile: 'D7',
             color: 'white',
             unit: {
-                class: 'queen',
+                class: 'pawn',
                 team: 'black',
-                image: 'q_b'
+                image: 'p_b'
             }
         },
         {
             tile: 'E7',
             color: 'black',
             unit: {
-                class: 'king',
+                class: 'pawn',
                 team: 'black',
-                image: 'k_b'
+                image: 'p_b'
             }
         },
         {
             tile: 'F7',
             color: 'white',
             unit: {
-                class: 'bishop',
+                class: 'pawn',
                 team: 'black',
-                image: 'b_b'
+                image: 'p_b'
             }
         },
         {
             tile: 'G7',
             color: 'black',
             unit: {
-                class: 'knight',
+                class: 'pawn',
                 team: 'black',
-                image: 'k_b'
+                image: 'p_b'
             }
         },
         {
             tile: 'H7',
             color: 'white',
             unit: {
-                class: 'rook',
+                class: 'pawn',
                 team: 'black',
-                image: 'r_w'
+                image: 'p_b'
             }
         }
     ],
@@ -394,72 +394,72 @@ export const defaultBoard: BoardType = [
             tile: 'A8',
             color: 'white',
             unit: {
-                class: 'pawn',
+                class: 'rook',
                 team: 'black',
-                image: 'p_b'
+                image: 'r_b'
             }
         },
         {
             tile: 'B8',
             color: 'black',
             unit: {
-                class: 'pawn',
+                class: 'knight',
                 team: 'black',
-                image: 'p_b'
+                image: 'n_b'
             }
         },
         {
             tile: 'C8',
             color: 'white',
             unit: {
-                class: 'pawn',
+                class: 'bishop',
                 team: 'black',
-                image: 'p_b'
+                image: 'b_b'
             }
         },
         {
             tile: 'D8',
             color: 'black',
             unit: {
-                class: 'pawn',
+                class: 'queen',
                 team: 'black',
-                image: 'p_b'
+                image: 'q_b'
             }
         },
         {
             tile: 'E8',
             color: 'white',
             unit: {
-                class: 'pawn',
+                class: 'king',
                 team: 'black',
-                image: 'p_b'
+                image: 'k_b'
             }
         },
         {
             tile: 'F8',
             color: 'black',
             unit: {
-                class: 'pawn',
+                class: 'bishop',
                 team: 'black',
-                image: 'p_b'
+                image: 'b_b'
             }
         },
         {
             tile: 'G8',
             color: 'white',
             unit: {
-                class: 'pawn',
+                class: 'knight',
                 team: 'black',
-                image: 'p_b'
+                image: 'n_b'
             }
         },
         {
             tile: 'H8',
             color: 'black',
             unit: {
-                class: 'pawn',
+                class: 'rook',
                 team: 'black',
-                image: 'p_b'
+                image: 'r_b'
             }
         }
     ]
