@@ -7,7 +7,7 @@ body {
 }
 
 .board {
-    @apply bg-red-100 grid grid-rows-[8] grid-cols-8 grid-flow-row;
+    @apply flex flex-col-reverse;
 }
 
 .blackTile {
@@ -16,4 +16,12 @@ body {
 
 .whiteTile {
     @apply bg-gray-300 w-20 h-20 text-black p-1;
+}
+
+.selectedWhiteTile {
+    @apply bg-gray-300 w-20 h-20 text-pink-700 p-1 shadow-lime-400;
+}
+
+.selectedBlackTile {
+    @apply bg-gray-700 w-20 h-20 text-pink-700 p-1;
 }
