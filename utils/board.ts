@@ -104,7 +104,11 @@ export const defaultBoard: BoardType = [
         {
             tile: 'D2',
             color: 'black',
-            unit: null
+            unit: {
+                class: 'pawn',
+                team: 'white',
+                image: 'p_w'
+            }
         },
         {
             tile: 'E2',
@@ -152,29 +156,17 @@ export const defaultBoard: BoardType = [
         {
             tile: 'B3',
             color: 'white',
-            unit: {
-                class: 'pawn',
-                team: 'black',
-                image: 'p_b'
-            }
+            unit: null
         },
         {
             tile: 'C3',
             color: 'black',
-            unit: {
-                class: 'pawn',
-                team: 'black',
-                image: 'p_b'
-            }
+            unit: null
         },
         {
             tile: 'D3',
             color: 'white',
-            unit: {
-                class: 'pawn',
-                team: 'white',
-                image: 'p_w'
-            }
+            unit: null
         },
         {
             tile: 'E3',
@@ -243,11 +235,7 @@ export const defaultBoard: BoardType = [
         {
             tile: 'A5',
             color: 'black',
-            unit: {
-                class: 'knight',
-                team: 'white',
-                image: 'n_w'
-            }
+            unit: null
         },
         {
             tile: 'B5',
@@ -272,11 +260,7 @@ export const defaultBoard: BoardType = [
         {
             tile: 'F5',
             color: 'white',
-            unit: {
-                class: 'knight',
-                team: 'white',
-                image: 'n_w'
-            }
+            unit: null
         },
         {
             tile: 'G5',

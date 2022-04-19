@@ -1,10 +1,77 @@
 import { BoardType, TileType } from "./board";
 
+// Constants
 export const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 export const numbers = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
-export const movePawn = (tile: string, team: string, board: BoardType) => {
-    let moveArray: Array<string> = [];
+
+// Function types
+type MoveFuncType = (arg1: BoardType, arg2: Array<string>, arg3: Array<string>, arg4: string, arg5: string, arg6: number, arg7: number) => TileType | null;
+type LinearMovementFuncType = (arg1: BoardType, arg2: string, arg3: string, arg4: number, arg5: string, arg6: string) => Array<string>;
+type FilterKnightMovesFuncType = (arg1: Array<TileType | null>, arg2: 'black' | 'white') => Array<string>;
+type GeneralMoverFuncType = (arg1: string, arg2: string, arg3: BoardType) => Array<string>;
+type MoveFromToFuncType = (arg1: TileType, arg2: string, arg3: string, arg4: BoardType) => BoardType;
+
+const move: MoveFuncType = (board, letters, numbers, boardLetter, boardNumber, stepsY, stepsX) => {
+    if (board[numbers.indexOf(boardNumber) + stepsY]) {
+        if (board[numbers.indexOf(boardNumber) + stepsY][letters.indexOf(boardLetter) + stepsX]) {
+            return board[numbers.indexOf(boardNumber) + stepsY][letters.indexOf(boardLetter) + stepsX];
+        } else {
+            return null
+        }
+    } else {
+        return null
+    }
+}
+
+const linearMovement: LinearMovementFuncType = (board, boardLetter, boardNumber, count, direction, team, lett: Array<string> = letters, nums: Array<string> = numbers, mov: MoveFuncType = move) => {
+    var returnArray: Array<string> = [];
+    for (var i = 1; i < count; i++) {
+
+        var dir: Array<number> = 
+            direction === 'left' ? [0, -i] :
+            direction === 'right' ? [0, i] :
+            direction === 'up' ? [i, 0] :
+            direction === 'down' ? [-i, 0] :
+            direction === 'upLeft' ? [i, -i] :
+            direction === 'upRight' ? [i, i] :
+            direction === 'downLeft' ? [-i, -i] :
+            direction === 'downRight' ? [-i, i] : [0, 0]
+
+        var directionHold = mov(board, lett, nums, boardLetter, boardNumber, dir[0], dir[1])
+
+        if (directionHold?.unit === null) {
+            returnArray.push(directionHold!.tile);
+        } else if (directionHold?.unit?.team === (team === 'white' ? 'black' : 'white')) {
+            returnArray.push(directionHold!.tile);
+            break;
+        } else if (directionHold?.unit?.team === (team === 'white' ? 'white' : 'black')) {
+            break;
+        } else {
+            break;
+        }
+    }
+    return returnArray;
+}
+
+const filterKnightMoves: FilterKnightMovesFuncType = (moves, team) => {
+    var returnArray: Array<string> = []
+    for (let i = 0; i < moves.length; i++) {
+        if (moves[i] === null || moves[i] === undefined) {
+            continue;
+        } else {
+            if (moves[i] && moves[i]!.unit === null || moves[i]!.unit?.team === team) {
+                returnArray.push(moves[i]!.tile)
+            }
+        }
+    }
+    return returnArray;
+}
+
+
+
+export const movePawn: GeneralMoverFuncType = (tile, team, board) => {
+    var moveArray: Array<string> = [];
     var boardCopy: BoardType = [...board];
 
     if (team === 'white') {
@@ -15,7 +82,7 @@ export const movePawn = (tile: string, team: string, board: BoardType) => {
         
         if (straight1 && straight1?.unit === null) {
             moveArray.push(straight1.tile);
-            if (straight2 && straight2.unit === null || straight2?.unit?.team === 'black') {
+            if (straight2 && straight2.unit === null) {
                 moveArray.push(straight2.tile);
             }
         }
@@ -33,7 +100,7 @@ export const movePawn = (tile: string, team: string, board: BoardType) => {
         
         if (straight1 && straight1?.unit === null) {
             moveArray.push(straight1.tile);
-            if (straight2 && straight2.unit === null || straight2?.unit?.team === 'white') {
+            if (straight2 && straight2.unit === null) {
                 moveArray.push(straight2.tile);
             }
         }
@@ -47,52 +114,111 @@ export const movePawn = (tile: string, team: string, board: BoardType) => {
     return moveArray
 }
 
-export const moveKnight = (tile: string, team: string, board: BoardType) => {
-    let moveArray: Array<string> = [];
+export const moveKnight: GeneralMoverFuncType = (tile, team, board) => {
+    var moveArray: Array<string> = [];
     var boardCopy: BoardType = [...board];
-
-    var possibleMoves: Array<TileType | null> = [
-        boardCopy[numbers.indexOf(tile[1]) + 2] ? boardCopy[numbers.indexOf(tile[1]) + 2][letters.indexOf(tile[0]) - 1] : null,
-        boardCopy[numbers.indexOf(tile[1]) + 2] ? boardCopy[numbers.indexOf(tile[1]) + 2][letters.indexOf(tile[0]) + 1] : null,
-        boardCopy[numbers.indexOf(tile[1]) - 1] ? boardCopy[numbers.indexOf(tile[1]) - 1][letters.indexOf(tile[0]) + 2] : null,
-        boardCopy[numbers.indexOf(tile[1]) + 1] ? boardCopy[numbers.indexOf(tile[1]) + 1][letters.indexOf(tile[0]) + 2] : null,
-        boardCopy[numbers.indexOf(tile[1]) - 2] ? boardCopy[numbers.indexOf(tile[1]) - 2][letters.indexOf(tile[0]) - 1] : null,
-        boardCopy[numbers.indexOf(tile[1]) - 2] ? boardCopy[numbers.indexOf(tile[1]) - 2][letters.indexOf(tile[0]) + 1] : null,
-        boardCopy[numbers.indexOf(tile[1]) - 1] ? boardCopy[numbers.indexOf(tile[1]) - 1][letters.indexOf(tile[0]) - 2] : null,
-        boardCopy[numbers.indexOf(tile[1]) + 1] ? boardCopy[numbers.indexOf(tile[1]) + 1][letters.indexOf(tile[0]) - 2] : null
-    ]
+    var knightMoves: Array<Array<number>> = [[2, -1], [2, 1], [-2, -1], [-2, 1], [1, -2], [1, 2], [-1, -2], [-1, 2]];
+    var possibleMoves: Array<TileType | null> = [];
+    
+    for (var i = 0; i < knightMoves.length; i++) {
+        possibleMoves.push(move(boardCopy, letters, numbers, tile[0], tile[1], knightMoves[i][0], knightMoves[i][1]));
+    };
 
     if (team === 'white') {
-        for (let i = 0; i < possibleMoves.length; i++) {
-            if (possibleMoves[i] === null || possibleMoves[i] === undefined) {
-                continue;
-            } else {
-                if (possibleMoves[i] && possibleMoves[i]!.unit === null || possibleMoves[i]!.unit?.team === 'black') {
-                    moveArray.push(possibleMoves[i]!.tile)
-                }
-            }
-        }
+        moveArray = filterKnightMoves(possibleMoves, 'black');
+    } else if (team === 'black') {
+        moveArray = filterKnightMoves(possibleMoves, 'white');
     }
 
-    if (team === 'black') {
-        for (let i = 0; i < possibleMoves.length; i++) {
-            if (possibleMoves[i] === null || possibleMoves[i] === undefined) {
-                continue;
-            } else {
-                if (possibleMoves[i] && possibleMoves[i]!.unit === null || possibleMoves[i]!.unit?.team === 'white') {
-                    moveArray.push(possibleMoves[i]!.tile)
-                }
-            }
-        }
-    }
+    return moveArray;
+}
 
-    console.log(possibleMoves);
+export const moveRook: GeneralMoverFuncType = (tile, team, board) => {
+    var tempArray = [];
+    var moveArray: Array<string> = [];
+    var boardCopy: BoardType = [...board];
+    var directions: Array<string> = ['left', 'right', 'left', 'right'];
+
+    if (team === 'white') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,8, directions[i], 'white'));
+        }
+        moveArray = tempArray.flat();
+
+    } else if (team === 'black') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,8, directions[i], 'black'));
+        }
+        moveArray = tempArray.flat();
+    }
+    return moveArray;
+}
+
+export const moveBishop: GeneralMoverFuncType = (tile, team, board) => {
+    var tempArray = [];
+    var moveArray: Array<string> = [];
+    var boardCopy: BoardType = [...board];
+    var directions: Array<string> = ['upLeft', 'upRight', 'downLeft', 'downRight'];
+
+    if (team === 'white') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,8, directions[i], 'white'));
+        }
+        moveArray = tempArray.flat();
+
+    } else if (team === 'black') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,8, directions[i], 'black'));
+        }
+        moveArray = tempArray.flat();
+    }
+    return moveArray;
+}
+
+export const moveQueen: GeneralMoverFuncType = (tile, team, board) => {
+    var tempArray = [];
+    var moveArray: Array<string> = [];
+    var boardCopy: BoardType = [...board];
+    var directions: Array<string> = ['upLeft', 'upRight', 'downLeft', 'downRight', 'up', 'down', 'left', 'right'];
+
+    if (team === 'white') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,8, directions[i], 'white'));
+        }
+        moveArray = tempArray.flat();
+
+    } else if (team === 'black') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,8, directions[i], 'black'));
+        }
+        moveArray = tempArray.flat();
+    }
+    return moveArray;
+}
+
+export const moveKing: GeneralMoverFuncType = (tile, team, board) => {
+    var tempArray = [];
+    var moveArray: Array<string> = [];
+    var boardCopy: BoardType = [...board];
+    var directions: Array<string> = ['upLeft', 'upRight', 'downLeft', 'downRight', 'up', 'down', 'left', 'right'];
+
+    if (team === 'white') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,2, directions[i], 'white'));
+        }
+        moveArray = tempArray.flat();
+
+    } else if (team === 'black') {
+        for (var i = 0; i < directions.length; i++) {
+            tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,2, directions[i], 'black'));
+        }
+        moveArray = tempArray.flat();
+    }
     return moveArray;
 }
 
 
-
-export const moveFromTo = (unit: TileType, from: string, to: string, board: BoardType) => {
+export const moveFromTo: MoveFromToFuncType = (unit, from, to, board) => {
     var boardCopy: BoardType = [...board];
 
     
@@ -116,43 +242,3 @@ export const moveFromTo = (unit: TileType, from: string, to: string, board: Boar
 
     return boardCopy;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*let straight1 = board[num].find(tile => tile.tile === `${lett}${num + 1}`);
-        let straight2 = num === 2 ? board[num + 1].find(tile => tile.tile === `${lett}${num + 2}`) : null;
-        let leftStraight = board[num].find(tile => tile.tile === `${letters[letterIndex - 1]}${num + 1}`)
-        let rightStraight = board[num].find(tile => tile.tile === `${letters[letterIndex + 1]}${num + 1}`)
-        */

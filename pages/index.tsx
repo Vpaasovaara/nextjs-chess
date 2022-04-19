@@ -3,7 +3,7 @@ import { BoardType, defaultBoard } from '../utils/board'
 import Image from 'next/image'
 import { TileType, UnitType } from '../utils/board'
 import { useState, useEffect } from 'react'
-import { movePawn, moveFromTo, moveKnight } from '../utils/movements'
+import { movePawn, moveFromTo, moveKnight, moveRook, moveBishop, moveQueen, moveKing } from '../utils/movements'
 import { useRouter } from 'next/router';
 
 const Home: NextPage = () => {
@@ -51,6 +51,18 @@ const Home: NextPage = () => {
         return;
       case 'knight':
         setPossibleMoves(moveKnight(tile, unit.team, [...board]));
+        return;
+      case 'rook':
+        setPossibleMoves(moveRook(tile, unit.team, [...board])!);
+        return;
+      case 'bishop':
+        setPossibleMoves(moveBishop(tile, unit.team, [...board])!);
+        return;
+      case 'queen':
+        setPossibleMoves(moveQueen(tile, unit.team, [...board])!);
+        return;
+      case 'king':
+        setPossibleMoves(moveKing(tile, unit.team, [...board])!);
         return;
       default:
         return
