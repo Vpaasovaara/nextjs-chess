@@ -316,7 +316,7 @@ export const checkForCheckMate = (board: BoardType, team: string) => {
     var boardCopy = JSON.parse(JSON.stringify(board));
 
     for (var i = 0; i < board.length; i++) {
-        var result = board[i].filter((tile: TileType) => tile.unit?.team === team);
+        var result = board[i].filter((tile: TileType) => tile.unit?.team === 'white' ? oppositeTeam : team);
         tempArray.push(result);
     }
     tempArray = tempArray.flat();
