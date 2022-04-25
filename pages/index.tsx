@@ -3,18 +3,22 @@ import { BoardType, defaultBoard } from '../utils/board'
 import Image from 'next/image'
 import { TileType, UnitType } from '../utils/board'
 import { useState, useEffect } from 'react'
-import { movePawn, moveFromTo, moveKnight, moveRook, moveBishop, moveQueen, moveKing } from '../utils/movements'
+import { movePawn, moveFromTo, moveKnight, moveRook, moveBishop, moveQueen, moveKing, checkForMate, checkForCheckMate } from '../utils/movements'
 import { useRouter } from 'next/router';
 
 const Home: NextPage = () => {
   const [ board, setBoard ] = useState<BoardType>([] as BoardType);
   const [ gameOn, setGameOn ] = useState<boolean>(false);
+  const [ gameOver, setGameOver ] = useState<boolean>(false);
   const [ player, setPlayer ] = useState<'black' | 'white'>('white');
   const [ selectedPiece, setSelectedPiece ] = useState<TileType | null>(null);
   const [ possibleMoves, setPossibleMoves ] = useState<Array<string>>([]);
+  const [ errorMessage, setErrorMessage ] = useState<string | null>(null);
   const router = useRouter();
 
   const clickTile = (tile: TileType) => {
+    setErrorMessage(null);
+    var boardCopy = JSON.parse(JSON.stringify(board))
     if (!tile.unit && !possibleMoves.includes(tile.tile)) {
       setSelectedPiece(null);
       setPossibleMoves([]);
@@ -24,16 +28,27 @@ const Home: NextPage = () => {
       setSelectedPiece(tile);
     }
     if (selectedPiece && possibleMoves.includes(tile.tile)) {
-      setBoard(moveFromTo(selectedPiece, selectedPiece.tile, tile.tile, [...board]));
+      var newBoard = moveFromTo(selectedPiece, selectedPiece.tile, tile.tile, boardCopy);
+      if (!checkForMate(newBoard, player)) {
+        setBoard(newBoard);
+        refreshData();
+        if (player === 'white') {
+          setPlayer('black');
+        } else {
+          setPlayer('white');
+        }
+      } else {
+        setErrorMessage('Invalid move');
+      }
       setSelectedPiece(null);
       setPossibleMoves([]);
-      refreshData();
-      if (player === 'white') {
-        setPlayer('black')
-      } else {
-        setPlayer('white')
-      }
+      
     }
+  }
+
+  const startGame = () => {
+    setGameOn(true);
+    setBoard(defaultBoard);
   }
 
   useEffect(() => {
@@ -43,6 +58,19 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (selectedPiece?.unit) calculateMoves(selectedPiece.unit, selectedPiece.tile);
   }, [selectedPiece])
+
+  useEffect(() => {
+    var boardCopy = JSON.parse(JSON.stringify(board))
+    if (checkForMate(boardCopy, player)) {
+      if (checkForCheckMate(boardCopy, player)) {
+        alert('check mate!')
+        setGameOn(false);
+        setGameOver(true);
+      } else {
+        setErrorMessage('mated');
+      }
+    }
+  }, [player])
 
   const calculateMoves = (unit: UnitType, tile: string) => {
     switch (unit.class) {
@@ -108,11 +136,12 @@ const Home: NextPage = () => {
         })}
       </div>
       <div className='mt-4'>
-        {!gameOn && <button onClick={() => setGameOn(true)} className='py-1 px-2 bg-white rounded'>Start Game</button>}
+        {!gameOn && <button onClick={() => startGame()} className='py-1 px-2 bg-white rounded'>Start Game</button>}
         {gameOn && 
         <div className='text-xl font-bold'>
           <div>{`${player} player's turn`}</div>
           {gameOn && selectedPiece?.unit && <div>{`Selected tile: ${selectedPiece.tile}`}<br />{`selected unit: ${selectedPiece.unit.team} ${selectedPiece.unit.class}`}</div>}
+          {errorMessage && <div>{errorMessage}</div>}
         </div>
         }
       </div>
@@ -121,60 +150,3 @@ const Home: NextPage = () => {
 }
 
 export default Home
-
-
-
-/*
-
-
-return (
-            <div className='' key={i}>
-              {row.map((tile: TileType) => {
-                return (
-                  <div onClick={() => clickTile(tile)} key={tile.tile} className={tile.color === 'white' ? 'whiteTile' : 'blackTile'}>
-                    {
-                    <>
-                      <div>{tile.tile}</div>
-                      <div className='flex items-center justify-center'>
-                        {tile.unit && 
-                        <Image 
-                          src={`/${tile.unit.image}.png`}
-                          alt={`${tile.unit.image}`}
-                          width={40}
-                          height={40}
-                        />}
-                      </div>
-                    </>
-                    }
-                  </div>
-                )
-              })}
-            </div>
-          )
-              return (
-            
-            <div className='' key={i}>
-              {row.map((tile: TileType) => {
-                return (
-                  <div onClick={() => clickTile(tile)} key={tile.tile} className={tile.color === 'white' ? 'whiteTile' : 'blackTile'}>
-                    {
-                    <>
-                      <div>{tile.tile}</div>
-                      <div className='flex items-center justify-center'>
-                        {tile.unit && 
-                        <Image 
-                          src={`/${tile.unit.image}.png`}
-                          alt={`${tile.unit.image}`}
-                          width={40}
-                          height={40}
-                        />}
-                      </div>
-                    </>
-                    }
-                  </div>
-                )
-              })}
-            </div>
-          )
-
-*/

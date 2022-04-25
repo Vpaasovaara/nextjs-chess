@@ -137,7 +137,7 @@ export const moveRook: GeneralMoverFuncType = (tile, team, board) => {
     var tempArray = [];
     var moveArray: Array<string> = [];
     var boardCopy: BoardType = [...board];
-    var directions: Array<string> = ['left', 'right', 'left', 'right'];
+    var directions: Array<string> = ['left', 'right', 'up', 'down'];
 
     if (team === 'white') {
         for (var i = 0; i < directions.length; i++) {
@@ -218,27 +218,151 @@ export const moveKing: GeneralMoverFuncType = (tile, team, board) => {
 }
 
 
-export const moveFromTo: MoveFromToFuncType = (unit, from, to, board) => {
-    var boardCopy: BoardType = [...board];
+export const moveFromTo: MoveFromToFuncType = (unit, from, to, boardCopy) => {
+    var boardCopy2: BoardType = [...boardCopy];
 
     
-    boardCopy[numbers.indexOf(from[1])][letters.indexOf(from[0])] = { ...unit, unit: null };
+    boardCopy2[numbers.indexOf(from[1])][letters.indexOf(from[0])] = { ...unit, unit: null };
     if (unit.unit?.team === 'white' && unit.unit.class === 'pawn' && numbers.indexOf(to[1]) === 7) {
-        boardCopy[numbers.indexOf(to[1])][letters.indexOf(to[0])].unit = {
+        boardCopy2[numbers.indexOf(to[1])][letters.indexOf(to[0])].unit = {
             class: 'queen',
             team: 'white',
             image: 'q_w'
         };
     } else if (unit.unit?.team === 'black' && unit.unit.class === 'pawn' && numbers.indexOf(to[1]) === 0) {
-        boardCopy[numbers.indexOf(to[1])][letters.indexOf(to[0])].unit = {
+        boardCopy2[numbers.indexOf(to[1])][letters.indexOf(to[0])].unit = {
             class: 'queen',
             team: 'black',
             image: 'q_b'
         };
     } else {
-        boardCopy[numbers.indexOf(to[1])][letters.indexOf(to[0])].unit = unit.unit;
+        boardCopy2[numbers.indexOf(to[1])][letters.indexOf(to[0])].unit = unit.unit;
     }
     
 
-    return boardCopy;
+    return boardCopy2;
+}
+
+const checkPawnMovements = (tile: string, team: string, board: BoardType) => {
+    var tempArray = [];
+    var moveArray: Array<string> = [];
+    var boardCopy: BoardType = [...board];
+
+    if (team === 'white') {
+        tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,2, 'upLeft', 'white'));
+        tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,2, 'upRight', 'white'));
+
+    } else if (team === 'black') {
+        tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,2, 'downLeft', 'black'));
+        tempArray.push(linearMovement(boardCopy, tile[0], tile[1] ,2, 'downRight', 'black'));
+    }
+    moveArray = tempArray.flat();
+    return moveArray;
+}
+
+export const allPossibleMoves = (board: BoardType, team: string) => {
+    var allMoves: string[] = [];
+    var tempArray = [];
+    var kingArray = [];
+    var tempArray2 = [];
+    var oppositeTeam = team === 'white' ? 'black' : 'white'
+    var allPieces: Array<TileType> = [];
+
+    for (var i = 0; i < board.length; i++) {
+        var result = board[i].filter((tile: TileType) => tile.unit?.team === oppositeTeam);
+        tempArray.push(result);
+    }
+    tempArray = tempArray.flat();
+
+    for (var i = 0; i < tempArray.length; i++) {
+        if (tempArray[i].unit?.class === 'bishop') {
+            tempArray2.push(moveBishop(tempArray[i].tile, oppositeTeam, [...board]));
+        } else if (tempArray[i].unit?.class === 'king') {
+            tempArray2.push(moveKing(tempArray[i].tile, oppositeTeam, [...board]));
+        } else if (tempArray[i].unit?.class === 'knight') {
+            tempArray2.push(moveKnight(tempArray[i].tile, oppositeTeam, [...board]));
+        } else if (tempArray[i].unit?.class === 'queen') {
+            tempArray2.push(moveQueen(tempArray[i].tile, oppositeTeam, [...board]));
+        } else if (tempArray[i].unit?.class === 'rook') {
+            tempArray2.push(moveRook(tempArray[i].tile, oppositeTeam, [...board])); 
+        } else if (tempArray[i].unit?.class === 'pawn') {
+            tempArray2.push(checkPawnMovements(tempArray[i].tile, oppositeTeam, [...board]));
+        }
+    }
+    
+    var tempSet = new Set(tempArray2.flat());
+    var allMoves = Array.from(tempSet);
+
+    for (var i = 0; i < board.length; i++) {
+        var kingTile = board[i].filter((tile: TileType) => tile.unit?.team === team && tile.unit?.class === 'king');
+        kingArray.push(kingTile);
+    }
+    kingArray = kingArray.flat();
+    var king = kingArray[0]?.tile ? kingArray[0].tile : '';
+
+    return { allMoves, king }
+}
+
+export const checkForMate = (board: BoardType, team: string): boolean => {
+    var { allMoves, king } = allPossibleMoves(board, team);
+
+    return allMoves.includes(king);
+}
+
+export const checkForCheckMate = (board: BoardType, team: string) => {
+    var tempArray = [];
+    var oppositeTeam = team === 'white' ? 'black' : 'white';
+    var isCheckMate = true;
+    var boardCopy = JSON.parse(JSON.stringify(board));
+
+    for (var i = 0; i < board.length; i++) {
+        var result = board[i].filter((tile: TileType) => tile.unit?.team === team);
+        tempArray.push(result);
+    }
+    tempArray = tempArray.flat();
+    //console.log(tempArray);
+
+    for (var i = 0; i < tempArray.length; i++) {
+        var unit = tempArray[i];
+        var tempArray2 = [];
+        var kingMovesAll = [];
+
+        if (unit.unit?.class === 'bishop') {
+            tempArray2.push(moveBishop(tempArray[i].tile, team, [...boardCopy]));
+        } else if (tempArray[i].unit?.class === 'king') {
+            tempArray2.push(moveKing(tempArray[i].tile, team, [...boardCopy]));
+            kingMovesAll.push(moveKing(tempArray[i].tile, team, [...boardCopy]));
+        } else if (tempArray[i].unit?.class === 'knight') {
+            tempArray2.push(moveKnight(tempArray[i].tile, team, [...boardCopy]));
+        } else if (tempArray[i].unit?.class === 'queen') {
+            tempArray2.push(moveQueen(tempArray[i].tile, team, [...boardCopy]));
+        } else if (tempArray[i].unit?.class === 'rook') {
+            tempArray2.push(moveRook(tempArray[i].tile, team, [...boardCopy])); 
+        } else if (tempArray[i].unit?.class === 'pawn') {
+            tempArray2.push(movePawn(tempArray[i].tile, team, [...boardCopy]));
+        }
+
+        tempArray2 = tempArray2.flat();
+        kingMovesAll = kingMovesAll.flat();
+
+        //console.log(`possible moves for ${unit.unit?.class} ${unit.tile}`, tempArray2);
+        //console.log(`possible moves for king`, kingMovesAll);
+
+
+        for (var x = 0; x < tempArray2.length; x++) {
+            if (tempArray2[i]) {
+              var newBoard = moveFromTo(unit, unit.tile, tempArray2[i], boardCopy);
+              var { allMoves, king } = allPossibleMoves(newBoard, team);
+
+              console.log("all moves for opposite team", allMoves);
+              console.log("king",king);
+
+              if (!allMoves.includes(king)) {
+                  isCheckMate = false;
+                  break;
+              }
+            }
+        }
+    }
+    return isCheckMate;
 }
